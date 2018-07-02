@@ -6,6 +6,6 @@ class Test {
 
 console.log('test');
 
-export default async (event: any) => {
+export default async (event: AWSLambda., context: AWSLambda.Context) => {
   return new Test();
 };
