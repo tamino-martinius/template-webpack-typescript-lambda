@@ -3,16 +3,22 @@
 This is a Webpack Template for creating AWS Lambda functions with TypeScript.
 
 ## TOC
-- [Webpack Template for TypeScript](#webpack-template-for-typescript)
+
+- [Webpack Template for Lambda using TypeScript](#webpack-template-for-lambda-using-typescript)
   - [TOC](#toc)
   - [Initialize your project](#initialize-your-project)
-  - [Initialize the project](#initialize-the-project)
-  - [Install our dependencies](#install-our-dependencies)
-  - [Add a TypeScript configuration file](#add-a-typescript-configuration-file)
-  - [Adding Webpack](#adding-webpack)
-  - [Add a build script](#add-a-build-script)
-  - [Create a basic project](#create-a-basic-project)
-  - [What next](#what-next)
+  - [Install SAM CLI](#install-sam-cli)
+  - [Add your code](#add-your-code)
+  - [Scripts](#scripts)
+    - [Build](#build)
+    - [Production Build](#production-build)
+    - [Watch](#watch)
+    - [Create CloudFormation Stack](#create-cloudformation-stack)
+    - [Update CloudFormation Stack](#update-cloudformation-stack)
+    - [Delete CloudFormation Stack](#delete-cloudformation-stack)
+    - [Update Lambda function](#update-lambda-function)
+    - [Local Test Invocation](#local-test-invocation)
+  - [Modify CloudFormation Stack](#modify-cloudformation-stack)
 
 ## Initialize your project
 
