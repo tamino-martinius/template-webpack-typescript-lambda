@@ -1,7 +1,6 @@
-# Webpack Template for TypeScript
+# Webpack Template for Lambda using TypeScript
 
-This is a Webpack Template for transpiling [TypeScript](http://www.typescriptlang.org/) to JavaScript.
-This readme explains how to build this Template from scratch, or how to extend an existing webpack project.
+This is a Webpack Template for creating AWS Lambda functions with TypeScript.
 
 ## TOC
 - [Webpack Template for TypeScript](#webpack-template-for-typescript)
@@ -17,210 +16,123 @@ This readme explains how to build this Template from scratch, or how to extend a
 
 ## Initialize your project
 
-Let's create a new package.
+Copy this Repository by using the GitHub [Import Repository](https://github.com/new/import) or just [download the source](https://github.com/tamino-martinius/template-webpack-typescript-lambda/archive/master.zip).
+
+Go to the folder and install dependencies:
 
 ```sh
-mkdir webpack-typescript
-cd webpack-typescript
+npm install
+# or
+yarn
 ```
 
-Next, we'll scaffold our project in the following way:
+## Install SAM CLI
 
-```txt
-webpack-typescript/
-├─ dist/
-├─ public/
-└─ src/
-   └─ components/
+To run your Lambda function locally you need to have [AWS SAM CLI](https://github.com/awslabs/aws-sam-cli) installed
+
+```sh
+pip install --user aws-sam-cli
 ```
 
-TypeScript files will start out in your `src` folder, run through the TypeScript compiler, then webpack, and end up in a `index.js` file in `dist`.
+Please verify that the `sam` command is working
 
-Let's scaffold this out:
+*Please note:*
 
-```shell
-mkdir src
+If you get the Error `ImportError: No module named ssl_match_hostname` while starting sam, please run:
+
+```sh
+pip uninstall backports.ssl-match-hostname
+pip install -U docker
 ```
 
-Webpack will eventually generate the `dist` directory for us.
+## Add your code
 
-## Initialize the project
+The main handler is expected to be the default export of the `src/index.ts` file. With `node 8.10` you can use an `async` function as default export. With `node 4.3.2` you need to return a callback with the default handler.
 
-Now we'll turn this folder into an npm package.
+Node 8:
 
-```shell
-npm init
-```
-
-You'll be given a series of prompts.
-You can use the defaults except for your entry point.
-You can always go back and change these in the `package.json` file that's been generated for you.
-
-## Install our dependencies
-
-Ensure TypeScript, Webpack, Vue and the necessary loaders are installed.
-Additionally its recommended to also install tslint to improve your code quality.
-
-```shell
-npm install --save-dev \
-  @types/node \
-  ts-loader \
-  tslint \
-  tslint-config-airbnb \
-  typescript \
-  webpack \
-  webpack-cli
-```
-
-Webpack is a tool that will bundle your code and optionally all of its dependencies into a single `.js` file. Webpack itself is not needed to transpile `.ts` files to `.js`, but its easy to extend if you need more then the base functionalety later.
-
-We didn't need to [add `.d.ts` files](https://www.typescriptlang.org/docs/handbook/declaration-files/consumption.html), but if we were using a package which didn't ship declaration files, we'd need to install the appropriate `@types/` package.
-[Read more about using definition files in our documentation](https://www.typescriptlang.org/docs/handbook/declaration-files/consumption.html).
-
-## Add a TypeScript configuration file
-
-You'll want to bring your TypeScript files together - both the code you'll be writing as well as any necessary declaration files.
-
-To do this, you'll need to create a `tsconfig.json` which contains a list of your input files as well as all your compilation settings. Simply create a new file in your project root named `tsconfig.json` and fill it with the following contents:
-
-```json
-{
-  "compilerOptions": {
-    "outDir": "./built/",
-    "sourceMap": true,
-    "strict": true,
-    "module": "es2015",
-    "moduleResolution": "node",
-    "target": "es5",
-    "experimentalDecorators": true,
-    "baseUrl": ".",
-    "paths": {
-      "@/*": [
-        "src/*"
-      ]
-    }
-  },
-  "exclude": [
-    "node_modules"
-  ],
-  "include": [
-    "src/**/*.ts"
-  ]
-}
-
-```
-
-Notice the `strict` flag is set to true. Strict gives you the `noImplicitThis` flag aswell as `noImplicitAny`, `strictNullChecks` and some others.
-We strongly recommend using TypeScript's stricter options for a better experience.
-
-## Adding Webpack
-
-We'll need to add a `webpack.config.js` to bundle our app.
-
-```js
-const path = require('path');
-const webpack = require('webpack');
-const uglifyJsPlugin = require('uglifyjs-webpack-plugin');
-const cleanWebpackPlugin = require('clean-webpack-plugin');
-
-module.exports = {
-  entry: './src/index.ts',
-  output: {
-    path: path.resolve(__dirname, './dist'),
-    filename: 'index.js',
-  },
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        loader: 'ts-loader',
-        exclude: /node_modules/,
-      },
-    ],
-  },
-  resolve: {
-    extensions: ['.ts', '.json'],
-  },
-  devServer: {
-    historyApiFallback: true,
-    noInfo: true,
-  },
-  performance: {
-    hints: false,
-  },
-  devtool: '#eval-source-map',
-  plugins: [
-    new cleanWebpackPlugin('./dist'),
-  ],
+```ts
+export default async (event: any, context: AWSLambda.Context) => {
+  return 'Hello World';
 };
-
-if (process.env.NODE_ENV === 'production') {
-  module.exports.devtool = '#source-map';
-  // http://vue-loader.vuejs.org/en/workflow/production.html
-  module.exports.plugins = (module.exports.plugins || []).concat([
-    new webpack.DefinePlugin({
-      'process.env': {
-        NODE_ENV: '"production"',
-      },
-    }),
-    new uglifyJsPlugin({
-      uglifyOptions: {
-        sourceMap: true,
-        compress: {
-          warnings: false,
-        },
-      },
-    }),
-    new webpack.LoaderOptionsPlugin({
-      minimize: true,
-    }),
-  ]);
-} else {
-  module.exports.mode = 'development';
-}
 ```
 
-## Add a build script
+Node 4:
 
-Open up your `package.json` and add a script named `build` to run Webpack.
-Your `"scripts"` field should look something like this:
-
-```json
-  "scripts": {
-    "build": "rm -rf dist && webpack",
-    "build:production": "npm run build --production",
-    "watch": "npm run build -- --watch"
-  },
+```ts
+export default (event: any, context: AWSLambda.Context, cb: AWSLambda.Callback) => {
+  return 'Hello World';
+};
 ```
 
-Once we add an entry point, we'll be able to build by running
+The `event` can also be typed with `AWSLambda.APIGatewayEvent` or others - depending on your Lambda invocation.
+
+## Scripts
+
+### Build
 
 ```sh
 npm run build
 ```
 
-If you want to build the minified release version
+Builds the code and saves it to the `dist` folder.
+
+### Production Build
 
 ```sh
-npm run build --production
-# or
 npm run build:production
 ```
 
-and have builds get triggered on changes by running
+Builds and minifies the code and saves it to the `dist` folder.
+
+### Watch
 
 ```sh
-npm run build -- --watch
-# or
 npm run watch
 ```
 
-## Create a basic project
+Listens to code changes and builds the code and saves it to the `dist` folder every time it detects changes.
 
-Last but not least you need to have an TypeScript file which will be the entry to your code. This file needs to be saved as `./src/index.ts`, unless you change it at the webpack entry setting
+### Create CloudFormation Stack
 
-## What next
+```sh
+npm run cf:create
+```
 
-You can build your code based on [this template](https://github.com/tamino-martinius/template-webpack-typescript).
+Creates Lambda function with an CloufFormation Stack based on the `package.json` settings and the CloudFormation Template build at the `scripts/env.ts` file.
 
-If you want to get started with TypeScript without installing anything you can use the [TypeScript Playground](http://www.typescriptlang.org/play/). It shows you the transpiled code and also supports many features which you might just know from rich code editors.
+### Update CloudFormation Stack
+
+```sh
+npm run cf:update
+```
+
+Updates the CloudFormation Stack based on the `package.json` settings and the CloudFormation Template build at the `scripts/env.ts` file. This creates an ChangeSet and applies it immediately.
+
+### Delete CloudFormation Stack
+
+```sh
+npm run cf:delete
+```
+
+Deletes the CloudFormation Stack. To prevent errors on rollback the S3 Bucket will get cleared first.
+
+### Update Lambda function
+
+```sh
+npm run lambda:update
+```
+
+Compiles the code with production settings and uploads the new code as zip file to Lambda. Code will be applied immediately.
+
+### Local Test Invocation
+
+```sh
+npm run sam:invoke
+```
+
+RunsLambda function locally with payload defined in `scripts/samInvoke.ts` This will be changed.
+
+## Modify CloudFormation Stack
+
+The CloudFormation Template is build at `scripts/env.ts`. This will be changed in the future.
